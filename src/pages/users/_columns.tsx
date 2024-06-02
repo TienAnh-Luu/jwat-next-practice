@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,49 +12,170 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "./types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import FormDialog from "@/components/FormDialog";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export const columns: ColumnDef<User>[] = [
   {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label='Select all'
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label='Select row'
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: "fullname",
-    header: "Full name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Full name
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "username",
-    header: "Username",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Username
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Role
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "activeYn",
-    header: "Active",
+    header: "Status",
+    cell: ({ row }) => {
+      const user = row.original;
+
+      return user.activeYn === "Y" ? (
+        <Badge
+          variant='outline'
+          className='border-lime-600 text-lime-600 py-[6px]'
+        >
+          Active
+        </Badge>
+      ) : (
+        <Badge
+          variant='outline'
+          className='p-[6px] border-red-600 text-red-600'
+        >
+          Offline
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "projects",
     header: "Projects",
   },
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const user = row.original;
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const user = row.original;
 
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant='ghost' className='h-8 w-8 p-0'>
-  //             <span className='sr-only'>Open menu</span>
-  //             <MoreHorizontal className='h-4 w-4' />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align='end'>
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem onClick={() => {}}>Edit User</DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem onClick={() => {}}>Delete User</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
+      const formUser = {
+        ...user,
+        projects: user.projects
+          .toString()
+          .split(", ")
+          .map((proj) => ({ name: proj })),
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='ghost' className='h-8 w-8 p-0'>
+              <span className='sr-only'>Open menu</span>
+              <MoreHorizontal className='h-4 w-4' />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <Dialog>
+              <DialogTrigger className='w-full'>
+                <DropdownMenuItem
+                  className='hover:cursor-pointer'
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  Edit User
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-[425px]'>
+                <DialogHeader>
+                  <DialogTitle>Edit User</DialogTitle>
+                  <DialogDescription>
+                    Make changes to user profile here. Click save when you're
+                    done.
+                  </DialogDescription>
+                </DialogHeader>
+                <FormDialog isEditing defaultValues={formUser} />
+              </DialogContent>
+            </Dialog>
+            <DropdownMenuSeparator />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem
+                  className='hover:cursor-pointer'
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  Delete User
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <ConfirmDialog handleConfirm={() => {}} />
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
 ];

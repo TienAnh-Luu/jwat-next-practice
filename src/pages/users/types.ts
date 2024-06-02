@@ -1,4 +1,4 @@
-export type Role = "Developer" | "HR" | "Security";
+export type Role = "Developer" | "HR" | "Security" | "Admin" | "Customer";
 
 export type Tab = "All" | Role;
 

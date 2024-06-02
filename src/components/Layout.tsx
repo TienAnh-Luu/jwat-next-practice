@@ -14,19 +14,19 @@ export type Menu = {
 
 const menu: Menu[] = [
   {
-    label: "Acme Inc",
+    label: "CLV",
     icon: <Package2 className='h-4 w-4 transition-all group-hover:scale-110' />,
-    href: "#",
+    href: "https://www.cyberlogitec.com.vn/",
   },
   {
-    label: "Dashboard",
+    label: "Home",
     icon: <Home className='h-5 w-5' />,
-    href: "#",
+    href: "/",
   },
   {
     label: "Users",
     icon: <Users2 className='h-5 w-5' />,
-    href: "#",
+    href: "/users",
   },
 ];
 

@@ -9,7 +9,9 @@ import { getPathParts } from "@/utils/routerUtils";
 
 const SidebarItem = ({ item }: { item: Menu }) => {
   const pathParts = getPathParts();
-  const isInThisRoute = pathParts.includes(item.label.toLowerCase());
+  const isInThisRoute =
+    pathParts.includes(item.label.toLowerCase()) ||
+    (pathParts.length === 0 && item.label === "Home");
 
   return (
     <Tooltip>
