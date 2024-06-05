@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Plus, Trash } from "lucide-react";
+import { User } from "@/pages/users/types";
 
 const formSchema = z.object({
   username: z.string().min(3).max(50),
@@ -33,13 +34,17 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
+type FormDialogProps = {
+  isEditing: boolean;
+  defaultValues?: FormSchema;
+  submitFn: (newUser: User, isUpdating: boolean) => void;
+};
+
 const FormDialog = ({
   isEditing = false,
   defaultValues,
-}: {
-  isEditing: boolean;
-  defaultValues?: FormSchema;
-}) => {
+  submitFn,
+}: FormDialogProps) => {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
@@ -56,7 +61,28 @@ const FormDialog = ({
   });
 
   function onSubmit(values: FormSchema) {
-    console.log(values);
+    submitFn(
+      {
+        ...values,
+        activeYn: "N",
+        projects: values.projects.map((proj) => proj.name),
+      },
+      isEditing
+    );
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      append({ name: "" });
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('input[name^="projects"]');
+        const nextInput = inputs[inputs.length - 1] as HTMLInputElement;
+        if (nextInput) {
+          nextInput.focus();
+        }
+      }, 0);
+    }
   }
 
   return (
@@ -126,7 +152,11 @@ const FormDialog = ({
                 name={`projects.${index}.name`}
                 render={({ field }) => (
                   <FormControl>
-                    <Input {...field} placeholder={`Project ${index + 1}`} />
+                    <Input
+                      {...field}
+                      placeholder={`Project ${index + 1}`}
+                      onKeyDown={(event) => handleKeyDown(event)}
+                    />
                   </FormControl>
                 )}
               />

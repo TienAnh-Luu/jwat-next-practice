@@ -127,7 +127,7 @@ export const columns: ColumnDef<User>[] = [
         ...user,
         projects: user.projects
           .toString()
-          .split(", ")
+          .split(",")
           .map((proj) => ({ name: proj })),
       };
 

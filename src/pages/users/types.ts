@@ -1,5 +1,7 @@
 export type Role = "Developer" | "HR" | "Security" | "Admin" | "Customer";
 
+export type TDialog = "Add" | "ConfirmDelete" | null;
+
 export type Tab = "All" | Role;
 
 export type User = {

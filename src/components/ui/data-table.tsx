@@ -31,16 +31,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isLoading: boolean;
   setSelectedUsers: (users: TData[]) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isLoading,
   setSelectedUsers,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -150,6 +153,15 @@ export function DataTable<TData, TValue>({
                   ))}
                 </TableRow>
               ))
+            ) : isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className='h-24 text-center'
+                >
+                  <ClipLoader color='#36d7b7' />
+                </TableCell>
+              </TableRow>
             ) : (
               <TableRow>
                 <TableCell
@@ -165,8 +177,8 @@ export function DataTable<TData, TValue>({
       </div>
       <div className='flex items-center justify-end space-x-2 py-4'>
         <div className='flex-1 text-sm text-muted-foreground'>
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel()?.rows.length} of{" "}
+          {table.getFilteredRowModel()?.rows.length} row(s) selected.
         </div>
         <div className='space-x-2'>
           <Button

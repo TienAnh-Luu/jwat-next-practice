@@ -3,8 +3,10 @@ import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
 import UserMenu from "./UserMenu";
 import BreadcrumbHeader from "./BreadcrumbHeader";
+import { Toaster } from "@/components/ui/toaster";
 import { Package2, Home, Users2 } from "lucide-react";
 import { TooltipProvider } from "./ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export type Menu = {
   label: string;
@@ -30,24 +32,29 @@ const menu: Menu[] = [
   },
 ];
 
+const queryClient = new QueryClient();
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <TooltipProvider>
-      <div className='flex min-h-screen w-full flex-col bg-muted/40'>
-        <Sidebar menu={menu} />
-        <div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
-          <header className='sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6'>
-            <MenuSheet menu={menu} />
-            <BreadcrumbHeader />
-            <SearchBar />
-            <UserMenu />
-          </header>
-          <main className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
-            {children}
-          </main>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <div className='flex min-h-screen w-full flex-col bg-muted/40'>
+          <Sidebar menu={menu} />
+          <div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
+            <header className='sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6'>
+              <MenuSheet menu={menu} />
+              <BreadcrumbHeader />
+              <SearchBar />
+              <UserMenu />
+            </header>
+            <main className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
+              {children}
+              <Toaster />
+            </main>
+          </div>
         </div>
-      </div>
-    </TooltipProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
