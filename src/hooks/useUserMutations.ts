@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/pages/users/types";
+import { toast } from "@/components/ui/use-toast";
 
 // TODO:
 // 1. Fix adding error
@@ -39,13 +40,14 @@ const fetchUpdateUser = async (user: User): Promise<string> => {
   return response.json();
 };
 
-const fetchDeleteUser = async (username: string): Promise<string> => {
+const fetchDeleteUser = async (
+  username: string
+): Promise<{ message: string }> => {
   const response = await fetch(`http://localhost:3333/users/${username}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
-    body: username,
   });
 
   if (!response.ok) {
@@ -58,8 +60,7 @@ const fetchDeleteUser = async (username: string): Promise<string> => {
 
 function useUserMutation<T>(
   mutationFn: (data: T) => Promise<any>,
-  type: "added" | "updated" | "deleted",
-  showToast: (text: string, isSuccessful: boolean) => void
+  type: "added" | "updated" | "deleted"
 ) {
   const queryClient = useQueryClient();
 
@@ -67,20 +68,24 @@ function useUserMutation<T>(
     mutationFn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fetchUsers"] });
-      showToast(`User ${type} successfully`, true);
+      toast({
+        variant: "success",
+        title: `User ${type} successfully`,
+        description: "The operation was successful.",
+      });
     },
     onError: (error) => {
-      showToast(error.toString(), false);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.toString(),
+      });
     },
   });
 }
 
-export const useInsertUser = (
-  showToast: (text: string, isSuccessful: boolean) => void
-) => useUserMutation<User>(fetchAddUser, "added", showToast);
-export const useUpdateUser = (
-  showToast: (text: string, isSuccessful: boolean) => void
-) => useUserMutation<User>(fetchUpdateUser, "updated", showToast);
-export const useDeleteUser = (
-  showToast: (text: string, isSuccessful: boolean) => void
-) => useUserMutation<string>(fetchDeleteUser, "deleted", showToast);
+export const useInsertUser = () => useUserMutation<User>(fetchAddUser, "added");
+export const useUpdateUser = () =>
+  useUserMutation<User>(fetchUpdateUser, "updated");
+export const useDeleteUser = () =>
+  useUserMutation<string>(fetchDeleteUser, "deleted");

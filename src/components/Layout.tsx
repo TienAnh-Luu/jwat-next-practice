@@ -3,7 +3,6 @@ import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
 import UserMenu from "./UserMenu";
 import BreadcrumbHeader from "./BreadcrumbHeader";
-import { Toaster } from "@/components/ui/toaster";
 import { Package2, Home, Users2 } from "lucide-react";
 import { TooltipProvider } from "./ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -49,7 +48,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </header>
             <main className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
               {children}
-              <Toaster />
             </main>
           </div>
         </div>

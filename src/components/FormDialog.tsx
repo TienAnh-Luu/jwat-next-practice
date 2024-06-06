@@ -60,6 +60,9 @@ const FormDialog = ({
     name: "projects",
   });
 
+  console.log("Type: ", typeof submitFn);
+  console.log(submitFn);
+
   function onSubmit(values: FormSchema) {
     submitFn(
       {

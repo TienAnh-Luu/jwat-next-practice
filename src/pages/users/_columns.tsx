@@ -25,6 +25,8 @@ import FormDialog from "@/components/FormDialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { useDeleteUser, useUpdateUser } from "@/hooks/useUserMutations";
+import { useState } from "react";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -122,6 +124,7 @@ export const columns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
+      const [isOpenDialog, setIsOpenDialog] = useState(false);
 
       const formUser = {
         ...user,
@@ -129,6 +132,14 @@ export const columns: ColumnDef<User>[] = [
           .toString()
           .split(",")
           .map((proj) => ({ name: proj })),
+      };
+
+      const { isPending: isUpdatingUser, mutate: updateUser } = useUpdateUser();
+      const { isPending: isDeletingUser, mutate: deleteUser } = useDeleteUser();
+
+      const handleSubmitForm = (u: User) => {
+        updateUser(u);
+        setIsOpenDialog(false);
       };
 
       return (
@@ -141,11 +152,15 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <Dialog>
+            <Dialog
+              open={isOpenDialog}
+              onOpenChange={(isOpen) => setIsOpenDialog(isOpen)}
+            >
               <DialogTrigger className='w-full'>
                 <DropdownMenuItem
                   className='hover:cursor-pointer'
                   onSelect={(e) => e.preventDefault()}
+                  onClick={() => setIsOpenDialog(true)}
                 >
                   Edit User
                 </DropdownMenuItem>
@@ -158,7 +173,11 @@ export const columns: ColumnDef<User>[] = [
                     done.
                   </DialogDescription>
                 </DialogHeader>
-                <FormDialog isEditing defaultValues={formUser} />
+                <FormDialog
+                  isEditing
+                  defaultValues={formUser}
+                  submitFn={handleSubmitForm}
+                />
               </DialogContent>
             </Dialog>
             <DropdownMenuSeparator />
@@ -171,7 +190,7 @@ export const columns: ColumnDef<User>[] = [
                   Delete User
                 </DropdownMenuItem>
               </AlertDialogTrigger>
-              <ConfirmDialog handleConfirm={() => {}} />
+              <ConfirmDialog handleConfirm={() => deleteUser(user.username)} />
             </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>

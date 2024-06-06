@@ -26,8 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListFilter, PlusCircle, Trash2 } from "lucide-react";
 import { User, Tab, TDialog } from "@/pages/users/types";
@@ -35,11 +33,7 @@ import { columns } from "@/pages/users/_columns";
 import { tabs } from "@/constants/constants";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import {
-  useDeleteUser,
-  useInsertUser,
-  useUpdateUser,
-} from "@/hooks/useUserMutations";
+import { useDeleteUser, useInsertUser } from "@/hooks/useUserMutations";
 
 const fetchUsersData = async (): Promise<User[]> => {
   const response = await fetch("http://localhost:3333/users");
@@ -49,8 +43,16 @@ const fetchUsersData = async (): Promise<User[]> => {
   return response.json();
 };
 
+/**
+ * 
+ TODO:
+ * - Apply useInfiniteQueries for pagination fetching
+ * - Apply Zustand
+ * - Add loading effect when insert, update or delete
+ *
+ */
+
 const UsersPage = () => {
-  // TODO: using useInfiniteQuery for pagination
   const {
     data: users,
     error: getUsersError,
@@ -58,28 +60,8 @@ const UsersPage = () => {
     isLoading: isLoadingUsers,
   } = useQuery({ queryKey: ["fetchUsers"], queryFn: fetchUsersData });
 
-  const { toast } = useToast();
-
-  const showToast = (message: string, isSuccessful: boolean) => {
-    isSuccessful
-      ? toast({
-          title: message,
-          description: "The operation was successful.",
-        })
-      : toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: message,
-          action: <ToastAction altText='Try again'>Try again</ToastAction>,
-        });
-  };
-
-  const { isPending: isCreatingUser, mutate: insertUser } =
-    useInsertUser(showToast);
-  const { isPending: isUpdatingUser, mutate: updateUser } =
-    useUpdateUser(showToast);
-  const { isPending: isDeletingUser, mutate: deleteUser } =
-    useDeleteUser(showToast);
+  const { isPending: isCreatingUser, mutate: insertUser } = useInsertUser();
+  const { isPending: isDeleteingUser, mutate: deleteUser } = useDeleteUser();
 
   const [activeTab, setActiveTab] = useState<Tab>("All");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
@@ -115,9 +97,13 @@ const UsersPage = () => {
     }
   }, [isFilterActiveUsers, activeTab, users]);
 
-  const handleSubmitUser = (newUser: User, isUpdating: boolean) => {
-    isUpdating ? updateUser(newUser) : insertUser(newUser);
+  const handleSubmitUser = (newUser: User) => {
+    insertUser(newUser);
     setOpenDialog(null);
+  };
+
+  const handleDeleteAll = () => {
+    Promise.all(selectedUsers.map((u) => deleteUser(u.username)));
   };
 
   return (
@@ -169,7 +155,7 @@ const UsersPage = () => {
                 </span>
               </Button>
             </AlertDialogTrigger>
-            <ConfirmDialog handleConfirm={() => {}} />
+            <ConfirmDialog handleConfirm={handleDeleteAll} />
           </AlertDialog>
           <Dialog
             open={openDialog === "Add"}
@@ -195,7 +181,10 @@ const UsersPage = () => {
                   Adding new user profile here. Click save when you're done.
                 </DialogDescription>
               </DialogHeader>
-              <FormDialog isEditing={false} submitFn={handleSubmitUser} />
+              <FormDialog
+                isEditing={false}
+                submitFn={(user: User) => handleSubmitUser(user)}
+              />
             </DialogContent>
           </Dialog>
         </div>
